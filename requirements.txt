@@ -1,0 +1,7 @@
+line-bot-sdk
+flask
+pytz
+lxml
+bs4
+requests
+python-dotenv
