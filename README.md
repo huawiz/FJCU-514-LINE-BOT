@@ -63,6 +63,7 @@ Camel Case
 │     └─course.html
 ├─.env
 ├─app.py
+├─command.py
 ├─common.py
 ├─coursedata.py
 ├─LineMessage.py
@@ -81,6 +82,8 @@ Camel Case
 `.env`: 放Line BOT API Token
 
 `app.py`: 專案執行檔，設定訊息接收與回應、網頁路由
+
+`command.py`: 指令對應動作
 
 `common.py`: 一些共用參數存放位置
 
