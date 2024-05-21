@@ -4,6 +4,7 @@ import json
 from common import *
 from bs4 import BeautifulSoup
 import os
+from flask import render_template
 
 
 # 讀課表資料
@@ -110,6 +111,7 @@ def getNextPeriodCourse(todayCourses, timeCurrent):
     return nextCourse
 
 
+# WebView使用
 
 
 def getScheduleData():
@@ -175,7 +177,11 @@ def mergeSameRowHtml(htmlContent):
     modifiedHtml = soup.prettify()
     return modifiedHtml
 
-
+def renderCourse():
+    scheduleData=getScheduleData()
+    periodMapping = {'D0': 0,'D1': 1,'D2': 2,'D3': 3,'D4': 4,'DN': 5,'D5': 6,'D6': 7,'D7': 8,'D8': 9,'E0': 10,'E1': 11,'E2': 12,'E3': 13,'E4': 14}
+    render = mergeSameRowHtml(render_template('course.html',**locals()))
+    return render
 
             
 
