@@ -7,9 +7,23 @@ import os
 
 
 # 讀課表資料
+
 def getjsonCourseData():
-    with open(os.path.join('data', 'courseData.json') ,encoding='utf-8') as f:
-        jsonCourseData = json.load(f)
+    file_path = os.path.join('data', 'courseData.json')
+    
+    # 確保目錄存在
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    # 嘗試打開並讀取檔案
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            jsonCourseData = json.load(f)
+    except FileNotFoundError:
+        # 如果檔案不存在，建立一個新的空檔案
+        jsonCourseData = {}
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(jsonCourseData, f, ensure_ascii=False, indent=4)
+    
     return jsonCourseData
 
 #獲取今日課表資料

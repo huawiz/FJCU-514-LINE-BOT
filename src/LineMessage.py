@@ -1,5 +1,7 @@
 import coursedata
 import json
+import os
+
 def msgNextClass():
     msg ='''
 {
@@ -218,7 +220,7 @@ def msgCourseMenu():
             "action": {
               "type": "uri",
               "label": "全部課表",
-              "uri": "https://hualinebot.azurewebsites.net/course"
+              "uri": "@[#課表路徑#]@"
             },
             "style": "secondary"
           }
@@ -229,6 +231,8 @@ def msgCourseMenu():
   }
 }
     '''
+
+    msg = msg.replace('@[#課表路徑#]@',os.getenv('course_url'))
     return json.loads(msg)
 
 def defaultAction():
