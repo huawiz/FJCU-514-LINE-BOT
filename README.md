@@ -46,6 +46,7 @@ lxml
 bs4
 requests
 python-dotenv
+folium
 ```
 
 `Host平台`: Azure Web Services
