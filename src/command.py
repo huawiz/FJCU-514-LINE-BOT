@@ -18,7 +18,8 @@ def handleMessage(event):
     handlers = {
         '下一節課': handleNextClass,
         '更新課表': handleUpdateCourse,
-        '課表選單': handleCourseMenu
+        '課表選單': handleCourseMenu,
+        '學校地圖':handleMap
     }
 
     webhookHandler = handlers.get(message, handleDefault)
@@ -57,3 +58,6 @@ def handleDefault(event):
     linebotAPI.reply_message(event.reply_token, message)
 
 
+def handleMap(event):
+    message = TextSendMessage(text='https://hualinebot.azurewebsites.net/map')
+    linebotAPI.reply_message(event.reply_token, message)

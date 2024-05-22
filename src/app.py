@@ -2,6 +2,7 @@ from flask import Flask, request, abort
 import os
 from command import webhookHandler,handleMessage
 from coursedata import renderCourse
+from map import renderMap
 from linebot.exceptions import (
     InvalidSignatureError
 )
@@ -15,6 +16,14 @@ app = Flask(__name__)
 def course():
     render = renderCourse()
     return render
+
+
+# Render WebView 課表
+@app.route('/map')
+def map():
+    render = renderMap()
+    return render
+
 
 # 監聽所有來自 /callback 的 Post Request
 @app.route("/callback", methods=['POST'])

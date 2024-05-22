@@ -6,6 +6,8 @@
   - [x] 更新課表
   - [x] 課表表格(WebView)
 
+- [x] 學校地圖檢視
+  
 ## 可能新增功能
 - [ ] 最新消息
 - [ ] 登入功能
@@ -57,7 +59,8 @@ Camel Case
 
 ``` 
 ├─data
-│     └─courseData.json
+│     ├─courseData.json
+│     └─map.geojson
 │      
 └─templates
 │     └─course.html
@@ -67,6 +70,7 @@ Camel Case
 ├─common.py
 ├─coursedata.py
 ├─LineMessage.py
+├─map.py
 ├─scraper.py
 └─requirements.txt     
 ```
@@ -74,6 +78,8 @@ Camel Case
 `data/`: 放資料檔案
 
 `data/courseData.json`: 課表資料
+
+`data/map.geojson`: 學校地圖資料
 
 `templates/`: 模板存放路徑
 
@@ -91,6 +97,8 @@ Camel Case
 
 `LineMessage.py`: 存放Line BOT回應訊息的模板
 
+`map`: render map資料
+
 `scraper.py`: 爬課表網站用的爬蟲
 
 `requirements.txt`: 部屬所需安裝的Python套件
@@ -99,7 +107,10 @@ Camel Case
 
 ## 更新歷程
 
-2024/5/21 完成初版，包含課表選單、下一節課、課表(WebView)
+2024
+  - 5/21 完成初版，包含課表選單、下一節課、課表(WebView)
+  - 5/22 新增簡易地圖功能
+
 
 
 ---

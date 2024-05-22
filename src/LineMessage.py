@@ -287,6 +287,20 @@ def defaultAction():
               "text": "更新課表"
             },
             "style": "secondary"
+          },
+          {
+            "type": "separator",
+            "margin": "md",
+            "color": "#ffffff"
+          },
+          {
+            "type": "button",
+            "action": {
+              "type": "uri",
+              "label": "學校地圖",
+              "uri": "@[#地圖#]@"
+            },
+            "style": "secondary"
           }
         ]
       }
@@ -295,4 +309,5 @@ def defaultAction():
   }
 }
     '''
+    msg = msg.replace('@[#地圖#]@',os.getenv('map_url'))
     return json.loads(msg)
