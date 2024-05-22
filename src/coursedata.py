@@ -145,30 +145,33 @@ def getScheduleData():
         scheduleData.append(daySchedule)
     return scheduleData
 
-
+# 合併每欄垂直的表格
 def mergeSameRowHtml(htmlContent):
     # 使用 BeautifulSoup 解析 HTML
     soup = BeautifulSoup(htmlContent, 'html.parser')
+    # 第一個<tr>為標頭，因此從第二列開始處理
     trs = soup.find_all('tr')[1:]
-    # 遍歷每一列，合併相同的儲存格
-    for i in range(6):  
-        rowSpan = 1
-        for j in range(len(trs)):
-            tds = trs[j].find_all('td')
-            # 檢查該列中是否存在第 i 列的儲存格
-            if len(tds) > i:
-                currentCell = tds[i]
-                for k in range(j + 1, len(trs)):
-                    nextTds = trs[k].find_all('td')
-                    # 檢查下一行的第 i 列是否存在並與當前儲存格的值相同
-                    if len(nextTds) > i and nextTds[i].get_text() == currentCell.get_text() :
-                        # 將下一行的相同儲存格標記為待刪除
-                        nextTds[i]['kill'] = '1'
-                        rowSpan += 1
-                        currentCell['rowspan'] = rowSpan
-                    else:
-                        rowSpan = 1
-                        break
+    # 從週一到週六，一欄一欄處理垂直<td>標籤
+    for weekday in range(6):  
+        rowspan = 1
+        # 基準列，和此列之後的next_row比對資料
+        for row in range(len(trs)):
+            tds = trs[row].find_all('td')
+            # 設定基準列
+            currentCell = tds[weekday]
+            for next_row in range(row + 1, len(trs)):
+                nextTds = trs[next_row].find_all('td')
+                # 檢查內容
+                if nextTds[weekday].get_text() == currentCell.get_text() :
+                    # 如果有內容一致，則在第一個之後的標籤，給予kill屬性，全部標註完成後再刪除
+                    nextTds[weekday]['kill'] = '1'
+                    # 每檢查到一個相同的內容，基準列的rowspan屬性+1
+                    rowspan += 1
+                    currentCell['rowspan'] = rowspan
+                else:
+                    # 若下一個和基準不一樣，則跳出迴圈，重置rowspan數為1
+                    rowspan = 1
+                    break
                     
     # 刪除所有有屬性 'kill'='1' 的標籤
     for tag in soup.find_all(attrs={"kill": "1"}):
@@ -178,6 +181,7 @@ def mergeSameRowHtml(htmlContent):
     return modifiedHtml
 
 def renderCourse():
+    courseName = '課表'
     scheduleData=getScheduleData()
     periodMapping = {'D0': 0,'D1': 1,'D2': 2,'D3': 3,'D4': 4,'DN': 5,'D5': 6,'D6': 7,'D7': 8,'D8': 9,'E0': 10,'E1': 11,'E2': 12,'E3': 13,'E4': 14}
     render = mergeSameRowHtml(render_template('course.html',**locals()))
