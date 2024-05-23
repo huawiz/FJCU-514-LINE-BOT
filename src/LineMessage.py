@@ -155,14 +155,14 @@ def msgNextClass():
     tw = coursedata.pytz.timezone('Asia/Taipei')
     currentTime = coursedata.datetime.datetime.now(tw)
     nextCourse = coursedata.getNextCourse(CourseData,currentTime)
-    msg = msg.replace('@[#課程名稱#]@',nextCourse['科目名稱'])
+    msg = msg.replace('@[#課程名稱#]@',nextCourse['科目名稱'].split('\n')[0])
     msg = msg.replace('@[#授課教師#]@',nextCourse['授課教師'])
     msg = msg.replace('@[#星期幾#]@','週'+nextCourse['星期'])
     msg = msg.replace('@[#教室#]@',nextCourse['教室'])
     msg = msg.replace('@[#節次#]@',nextCourse['節次'])
     msg = msg.replace('@[#開課單位#]@',nextCourse['開課單位名稱'])
     msg = msg.replace('@[#課程代碼#]@',nextCourse['課程代碼'])
-    return json.loads(msg)
+    return json.loads(msg,strict=False)
 
 def msgNextClassText():
     CourseData = coursedata.getjsonCourseData()

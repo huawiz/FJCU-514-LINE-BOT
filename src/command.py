@@ -19,7 +19,7 @@ def handleMessage(event):
         '下一節課': handleNextClass,
         '更新課表': handleUpdateCourse,
         '課表選單': handleCourseMenu,
-        '學校地圖':handleMap
+        '學校地圖': handleMap
     }
 
     webhookHandler = handlers.get(message, handleDefault)
