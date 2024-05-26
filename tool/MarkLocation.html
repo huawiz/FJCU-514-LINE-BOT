@@ -1,0 +1,86 @@
+<!--GPT Generate-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map with Markers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 1000px;
+        }
+        #controls {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <div id="controls">
+        <button onclick="exportMarkersToGeoJSON()">Export to GeoJSON</button>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([25.0356527, 121.43246071925405], 16); // Set view to the new coordinates
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = []; // Array to store markers
+
+        // Function to handle marker creation on map click
+        function onMapClick(e) {
+            var markerName = prompt("Enter the name for this marker:");
+            if (markerName) {
+                var marker = L.marker(e.latlng).addTo(map)
+                    .bindPopup('Marker: ' + markerName + '<br>' + e.latlng.toString());
+
+                marker.options.name = markerName; // Save the name in marker options
+                markers.push(marker); // Add marker to array
+            }
+        }
+
+        // Register the click event listener on the map
+        map.on('click', onMapClick);
+
+        // Function to export markers to GeoJSON
+        function exportMarkersToGeoJSON() {
+            var features = [];
+            markers.forEach(function(marker) {
+                var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [marker.getLatLng().lng, marker.getLatLng().lat]
+                    },
+                    "properties": {
+                        "name": marker.options.name // Use the name stored in marker options
+                    }
+                };
+                features.push(feature);
+            });
+
+            var geoJSON = {
+                "type": "FeatureCollection",
+                "features": features
+            };
+
+            // Convert GeoJSON to string
+            var geoJSONString = JSON.stringify(geoJSON, null, 2);
+
+            // Create a Blob containing the GeoJSON string
+            var blob = new Blob([geoJSONString], {type: "application/json"});
+
+            // Create a link element to download the GeoJSON file
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "markers.geojson";
+            link.click();
+        }
+    </script>
+</body>
+</html>

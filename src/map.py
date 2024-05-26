@@ -1,69 +1,86 @@
 import folium
 import json
 import os
-from folium.plugins import Search
+from flask import render_template
+
+
 
 def renderMap():
 
+    # 設定顯示的地圖邊界
     min_lon, max_lon = 121.4282, 121.4362
     min_lat, max_lat = 25.0322, 25.0408
 
 
-
+    # 建立地圖
     map = folium.Map(
-        location=[(min_lat + max_lat) / 2, (min_lon + max_lon) / 2],
-        zoom_start=17,
-        max_bounds=True,
+        location=[(min_lat + max_lat) / 2, (min_lon + max_lon) / 2], # 中心位置
+        zoom_start=17, # 預設縮放大小
+        max_bounds=True, # 啟用最大邊界，避免使用者拉到輔大外的地圖
         min_lat=min_lat,
         max_lat=max_lat,
         min_lon=min_lon,
         max_lon=max_lon,
-        min_zoom=16,max_zoom=19,
-        attribution_control=False
+        min_zoom=17,max_zoom=20, # 可縮放大小
+        attribution_control=False, # 關閉右下提供者訊息
     )
 
     
-    map_geojson = os.path.join('data', 'map.geojson')
+    # 繪製地圖範圍資料
+    map_geojson = os.path.join('map', 'map.geojson')
     with open(map_geojson, 'r', encoding='utf-8') as f:
         mapData = json.load(f)
 
     area = folium.GeoJson(
         mapData,
         style_function=lambda x: {
-            'fillColor': '#000000',  # 填充黑色
-            'color': '#00000000',    # 无边界颜色
-            'weight': 0,             # 无边界
-            'fillOpacity': 0.7       # 填充透明度
+            'fillColor': '#000000',  
+            'color': '#000000',    
+            'weight': 0,             
+            'fillOpacity': 0.7       
         }
     ).add_to(map)
 
 
-    locate_geojson = os.path.join('data', 'location.geojson')
-    with open(locate_geojson, 'r', encoding='utf-8') as f:
-        locationData = json.load(f)
+
+
+    
+    # 繪製地標資料
+    
+    ## 設定地標點樣式
     def style_function(feature):
         markup = """
                 <div style="font-size: 0.8em;">
                 <div style="width: 10px;
                             height: 10px;
-                            border: 1px solid black;
+                            border: 1px solid #303F9F;
                             border-radius: 5px;
-                            background-color: orange;">
+                            background-color: #29B6F6;">
                 </div>
-            </div>
+                 </div>
         """
         return {"html": markup}
-    # Add the GeoJSON layer with a tooltip
+
+    # 讀取地標資料
+    locate_geojson = os.path.join('map', 'location.geojson')
+    with open(locate_geojson, 'r', encoding='utf-8') as f:
+        locationData = json.load(f)
+    
+    # 加入地標資料
     fju_geo = folium.GeoJson(
         locationData,
-            name="fju",
-    tooltip=folium.GeoJsonTooltip(
-        fields=["name"], aliases=["地點"], localize=True
-    ),marker=folium.Marker(icon=folium.DivIcon()),style_function=style_function
+        name="fju_location",
+        tooltip=folium.GeoJsonTooltip(
+            fields=["name"], aliases=["地點"], localize=True
+        ),
+        marker=folium.Marker(icon=folium.DivIcon()),
+        style_function=style_function
     ).add_to(map)
 
+    
 
-    # Move the zoom control to the bottom right
+
+    # 將縮放按鍵移至右下角(使用JS將leaflet-control-zoom移動到leaflet-bottom.leaflet-right)
     map_script_zoom_control = '<script>document.addEventListener("DOMContentLoaded", function() {\
         document.querySelector("div.leaflet-bottom.leaflet-right").insertBefore(\
             document.querySelector("div.leaflet-control-zoom"), document.querySelector("div.leaflet-control-attribution")\
@@ -71,8 +88,8 @@ def renderMap():
     });</script>'
     map.get_root().html.add_child(folium.Element(map_script_zoom_control))
 
-
-        
+    
+    # 自訂搜尋欄
     search_box = '''
     <style>
         .form {
@@ -119,6 +136,7 @@ def renderMap():
             }
         }
     </style>
+
     <div class="container" style="position: absolute; top: 10px; z-index: 9999; max-width: 400px;">
         <div class="row height d-flex justify-content-start align-items-center">
             <div class="col form-container">
@@ -131,22 +149,22 @@ def renderMap():
         </div>
     </div>
     <script>
-        // 假设您有一个名为 map 的地图对象，并且已经在其他地方初始化
+        // 塞入地標資料
         var geoJSONData = {{ geo_json_str }};
-        // 从 GeoJSON 数据中提取地点名称
+        // 從地標資料獲取搜尋範圍
         var places = geoJSONData.features.map(function(feature) {
         return feature.properties.name;
     }).filter(function(name) {
         return name !== null && name.trim() !== '';
     });
 
-    var currentIndex = -1; // 当前选中的建议索引
+    var currentIndex = -1; // 當前選擇的建議索引
 
     document.getElementById('searchBox').addEventListener('input', function () {
         var query = this.value.trim();
         var suggestions = document.getElementById('suggestions');
         suggestions.innerHTML = '';
-        currentIndex = -1; // 重置当前索引
+        currentIndex = -1; // 重製索引
         if (query) {
             var filteredPlaces = places.filter(function (place) {
                 return place.includes(query);
@@ -169,18 +187,22 @@ def renderMap():
         }
     });
 
+    //搜尋欄動作
     document.getElementById('searchBox').addEventListener('keydown', function (event) {
         var suggestions = document.getElementById('suggestions');
         var items = suggestions.getElementsByTagName('li');
+        // 按下Enter時執行搜尋
         if (event.key === 'Enter') {
             event.preventDefault();
             selectPlace();
+        // 往下選擇建議的選單
         } else if (event.key === 'ArrowDown') {
             event.preventDefault();
             if (currentIndex < items.length - 1) {
                 currentIndex++;
                 highlightSuggestion(items, currentIndex);
             }
+        // 往上選擇建議選單
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
             if (currentIndex > 0) {
@@ -190,10 +212,12 @@ def renderMap():
         }
     });
 
+    
     document.getElementById('searchBox').addEventListener('focusout', function () {
         selectPlace();
     });
 
+    // 選擇建議選單的項目
     function selectPlace() {
         var suggestions = document.getElementById('suggestions');
         var items = suggestions.getElementsByTagName('li');
@@ -219,6 +243,7 @@ def renderMap():
         }
     }
 
+    // 反白被選擇的建議項目
     function highlightSuggestion(items, index) {
         for (var i = 0; i < items.length; i++) {
             if (i === index) {
@@ -230,6 +255,7 @@ def renderMap():
         }
     }
 
+    //移動到搜尋欄選擇的目標
        function moveToPlace(place) {
         var selectedFeature = geoJSONData.features.find(function (feature) {
             return feature.properties.name === place;
@@ -240,19 +266,23 @@ def renderMap():
             var name = selectedFeature.properties.name;
             var alias = selectedFeature.properties.alias?selectedFeature.properties.alias:'Null';
             {{map}}.flyTo([coordinates[1], coordinates[0]], 19);
-            L.popup([coordinates[1], coordinates[0]],{content:alias+" "+name}).openOn({{map}});
+            L.popup([coordinates[1], coordinates[0]],{content:name}).openOn({{map}});
         }
     }
-
-    
-    
 </script>
     '''
-
-    # Replace the placeholders with the actual data
+    # 加入搜尋欄到地圖中
     search_box = search_box.replace('{{map}}', map.get_name())
     search_box = search_box.replace('{{ geo_json_str }}', json.dumps(fju_geo.data))
-
     map.get_root().html.add_child(folium.Element(search_box))
 
-    return map.get_root().render()
+    # Render
+    map.get_root().render()
+    render = render_template(
+        "map.html",
+        header=map.get_root().header.render(),
+        body_html=map.get_root().html.render(),
+        script=map.get_root().script.render(),
+        map_name=map.get_name(),
+    )
+    return render

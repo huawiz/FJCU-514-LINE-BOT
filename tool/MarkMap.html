@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map with Markers and Polygons</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map {
+            height: 1000px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+
+    <label for="markerName">Marker Name:</label>
+    <input type="text" id="markerName">
+    <button onclick="enableMarkerPlacement()">Enable Marker Placement</button>
+    <button onclick="addPolygon()">Start Drawing Polygon</button>
+    <button onclick="exportMarkersAndPolygonsToGeoJSON()">Export to GeoJSON</button>
+
+    <script>
+        var map = L.map('map').setView([25.0356527, 121.43246071925405], 16); // Set view to the new coordinates
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markers = []; // Array to store markers
+        var polygons = []; // Array to store polygons
+
+        var polygonDrawing = false;
+        var currentPolygon = null;
+        var markerPlacementEnabled = false;
+
+        // Function to handle marker creation on map click
+        function onMapClick(e) {
+            if (polygonDrawing) {
+                currentPolygon.addLatLng(e.latlng);
+            } else if (markerPlacementEnabled) {
+                var markerName = document.getElementById("markerName").value;
+                var marker = L.marker(e.latlng).addTo(map)
+                    .bindPopup('Marker: ' + markerName);
+
+                markers.push({name: markerName, marker: marker}); // Add marker to array
+                markerPlacementEnabled = false; // Disable marker placement after adding the marker
+            }
+        }
+
+        // Register the click event listener on the map
+        map.on('click', onMapClick);
+
+        // Function to enable marker placement
+        function enableMarkerPlacement() {
+            markerPlacementEnabled = true;
+            alert("Click on the map to place the marker.");
+        }
+
+        // Function to start drawing polygon
+        function addPolygon() {
+            polygonDrawing = true;
+            currentPolygon = L.polygon([]).addTo(map);
+            alert("Click on the map to draw the polygon. Right-click to finish.");
+            map.on('contextmenu', finishPolygon);
+        }
+
+        // Function to finish drawing polygon
+        function finishPolygon(e) {
+            polygonDrawing = false;
+            polygons.push(currentPolygon); // Add the drawn polygon to the polygons array
+            map.off('contextmenu', finishPolygon); // Remove event listener
+        }
+
+        // Function to export markers and polygons to GeoJSON
+        function exportMarkersAndPolygonsToGeoJSON() {
+            var features = [];
+            markers.forEach(function(item) {
+                var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [item.marker.getLatLng().lng, item.marker.getLatLng().lat]
+                    },
+                    "properties": {
+                        "name": item.name
+                    }
+                };
+                features.push(feature);
+            });
+
+            polygons.forEach(function(polygon) {
+                var latLngs = polygon.getLatLngs()[0];
+                var coordinates = [];
+                latLngs.forEach(function(latLng) {
+                    coordinates.push([latLng.lng, latLng.lat]);
+                });
+
+                var feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [coordinates]
+                    }
+                };
+                features.push(feature);
+            });
+
+            var geoJSON = {
+                "type": "FeatureCollection",
+                "features": features
+            };
+
+            // Convert GeoJSON to string
+            var geoJSONString = JSON.stringify(geoJSON, null, 2);
+
+            // Create a Blob containing the GeoJSON string
+            var blob = new Blob([geoJSONString], {type: "application/json"});
+
+            // Create a link element to download the GeoJSON file
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "markers_and_polygons.geojson";
+            link.click();
+        }
+    </script>
+</body>
+</html>

@@ -7,14 +7,6 @@
   - [x] 課表表格(WebView)
 
 - [x] 學校地圖檢視
-  
-## 可能新增功能
-- [ ] 最新消息
-- [ ] 登入功能
-  - [ ] 資料庫
-  - [ ] LIFF
-  - [ ] Access Token機制
-  
 
 ..功能介紹待補..
 
@@ -60,9 +52,11 @@ Camel Case
 
 ``` 
 ├─data
-│     ├─courseData.json
-│     └─map.geojson
-│      
+│     └─courseData.json
+│     
+├─map  
+│     ├─location.geojson  
+│     └─map.geojson 
 └─templates
 │     └─course.html
 ├─.env
@@ -80,7 +74,9 @@ Camel Case
 
 `data/courseData.json`: 課表資料
 
-`data/map.geojson`: 學校地圖資料
+`map/map.geojson`: 學校地圖範圍資料
+
+`map/location.geojson`: 學校地圖座標資料
 
 `templates/`: 模板存放路徑
 
