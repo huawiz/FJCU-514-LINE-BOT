@@ -58,7 +58,8 @@ Camel Case
 │     ├─location.geojson  
 │     └─map.geojson 
 └─templates
-│     └─course.html
+│     ├─course.html
+│     └─map.html
 ├─.env
 ├─app.py
 ├─command.py
@@ -81,6 +82,8 @@ Camel Case
 `templates/`: 模板存放路徑
 
 `templates/course.html`: render 課表的模板
+
+`templates/map.html`: render 地圖的模板
 
 `.env`: 放Line BOT API Token
 
