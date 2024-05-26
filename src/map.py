@@ -62,12 +62,12 @@ def renderMap():
         return {"html": markup}
 
     # 讀取地標資料
-    locate_geojson = os.path.join('map', 'location.geojson')
-    with open(locate_geojson, 'r', encoding='utf-8') as f:
+    locateGeojson = os.path.join('map', 'location.geojson')
+    with open(locateGeojson, 'r', encoding='utf-8') as f:
         locationData = json.load(f)
     
     # 加入地標資料
-    fju_geo = folium.GeoJson(
+    fjuGeo = folium.GeoJson(
         locationData,
         name="fju_location",
         tooltip=folium.GeoJsonTooltip(
@@ -81,16 +81,16 @@ def renderMap():
 
 
     # 將縮放按鍵移至右下角(使用JS將leaflet-control-zoom移動到leaflet-bottom.leaflet-right)
-    map_script_zoom_control = '<script>document.addEventListener("DOMContentLoaded", function() {\
+    zoomControl = '<script>document.addEventListener("DOMContentLoaded", function() {\
         document.querySelector("div.leaflet-bottom.leaflet-right").insertBefore(\
             document.querySelector("div.leaflet-control-zoom"), document.querySelector("div.leaflet-control-attribution")\
         );\
     });</script>'
-    map.get_root().html.add_child(folium.Element(map_script_zoom_control))
+    map.get_root().html.add_child(folium.Element(zoomControl))
 
     
     # 自訂搜尋欄
-    search_box = '''
+    searchBox = '''
     <style>
         .form {
             position: relative;
@@ -272,16 +272,16 @@ def renderMap():
 </script>
     '''
     # 加入搜尋欄到地圖中
-    search_box = search_box.replace('{{map}}', map.get_name())
-    search_box = search_box.replace('{{ geo_json_str }}', json.dumps(fju_geo.data))
-    map.get_root().html.add_child(folium.Element(search_box))
+    searchBox = searchBox.replace('{{map}}', map.get_name())
+    searchBox = searchBox.replace('{{ geo_json_str }}', json.dumps(fjuGeo.data))
+    map.get_root().html.add_child(folium.Element(searchBox))
 
     # Render
     map.get_root().render()
     render = render_template(
         "map.html",
         header=map.get_root().header.render(),
-        body_html=map.get_root().html.render(),
+        body=map.get_root().html.render(),
         script=map.get_root().script.render(),
         map_name=map.get_name(),
     )
